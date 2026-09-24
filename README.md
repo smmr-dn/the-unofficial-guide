@@ -29,7 +29,7 @@
 
 ## Chunking Strategy
 
-**Chunk size:**
+**Chunk size: 100**
 **Overlap:**
 
 <!-- What about YOUR documents made you pick these numbers? Short posts and
@@ -53,29 +53,42 @@
 
      Milestone 3. -->
 
-**Chunk 1** — source: `` — produced by: ``
+**Chunk 1** — `source`: guide_accessibility.md#0  |  `produced by`: chunker.py::split_documents
 
 ```
+An honest assessment rather than a promotional one. Some of these places are difficult and it is better to know in advance.
 ```
 
-**Chunk 2** — source: `` — produced by: ``
+**Chunk 2** — `source`: guide_corry_vale.md#5  |  `produced by`: chunker.py::split_documents
 
 ```
+Corry Vale Where to stay
+
+Perhaps thirty beds in the entire valley, spread across two pubs and a handful of farmhouse rooms. In summer these are booked months ahead. Camping is permitted on two marked fields and nowhere else.
 ```
 
-**Chunk 3** — source: `` — produced by: ``
+**Chunk 3** — `source`: guide_givens_mill.md#2  |  `produced by`: chunker.py::split_documents
 
 ```
+Kestrelford What to see
+
+The market square on a Saturday morning is the main event and has run continuously since the 1400s. The parish church has a 13th-century tower you can climb for £2. The old trackbed walk runs six miles to the next village along an easy gradient and is the best half-day here.
 ```
 
-**Chunk 4** — source: `` — produced by: ``
+**Chunk 4** — `source`: guide_kestrelford.md#4  |  `produced by`: chunker.py::split_documents
 
 ```
+Kestrelford What to see
+
+The market square on a Saturday morning is the main event and has run continuously since the 1400s. The parish church has a 13th-century tower you can climb for £2. The old trackbed walk runs six miles to the next village along an easy gradient and is the best half-day here.
 ```
 
-**Chunk 5** — source: `` — produced by: ``
+**Chunk 5** — `source`: guide_pellew_sands.md#6  |  `produced by`: chunker.py::split_documents
 
 ```
+Pellew Sands When to go
+
+June and September for the beach without the crowds. July and August are busy and the town is at its most itself, for better and worse. Winter is bleak, largely closed, and has a following among people who like that sort of thing.
 ```
 
 ## Sample Answer
