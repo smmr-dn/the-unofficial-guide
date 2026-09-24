@@ -27,7 +27,7 @@ QUESTIONS = [
     {"question": "What to see under 2 hours in Brightwater?", "expects": "Students can spend 90 minutes visiting the mill building. The river walk runs four miles upstream to a weir and is the thing most people remember. The cathedral is small and 14th century and takes 20 minutes."},
     {"question": "Where should students visit during the summer?", "expects": "June is excellent everywhere. July and August split: Halden Bay becomes very busy and the parking problem dominates, Kestrelford fills with walkers, and Brightwater goes quiet to the point of dullness with the university empty. If you are going to Halden Bay in August, arrive before 10am or plan to use the overflow lot."},
     {"question": "What should students eat when visiting Halden Bay?", "expects": "Seafood but they must arrive before 9pm."},
-    {"question": "Where in the region has difficult mobile accessibility?", "expects": "Kestrelford, Halden Bay, and Corry Vale"},
+    {"question": "Where in the region has difficult accessibility?", "expects": "Kestrelford, Halden Bay, and Corry Vale"},
 ]
 
 # Questions from a different world entirely. Your gate should refuse all five.

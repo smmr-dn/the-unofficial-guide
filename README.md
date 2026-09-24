@@ -1,19 +1,8 @@
 # The Unofficial Guide
 
-<!-- Replace this line with your name and which corpus you picked. -->
+Uyen Doan
 
-> **This file is your submission.** Fill it in as you go — most sections get
-> written during the milestone that produces them, not at the end.
->
-> How the starter works, and every command you'll need, is in `RUNNING.md`.
-> Leave that file alone.
->
-> **Paste everything as text.** No screenshots, no video. A typed table gets
-> full credit; a picture of the same table gets none.
->
-> Delete these instruction blocks as you replace them. The `<!-- -->` comments
-> are notes to you and don't show up when the page renders — you can leave them
-> or remove them.
+Corpus: City Guides
 
 ---
 
@@ -21,16 +10,13 @@
 
 ## What This Does
 
-<!-- Three or four sentences. Which corpus you picked, and the kinds of
-     questions your system answers. Write it for someone who has never seen
-     this repo.
-
-     Milestone 5. -->
+This is a question-answering system built on a corpus of city and town guides for one region — Brightwater, Halden Bay, Kestrelford, Corry Vale, Pellew Sands, and a handful of others — plus cross-cutting guides on eating, walking, seasons, transport, and accessibility. It answers specific, factual questions about the region: what to see somewhere in a given amount of time, where and what to eat, when to visit, and which places are hard to get around. Questions outside that scope, like general trivia unrelated to the region, are refused instead of guessed at.
 
 ## Chunking Strategy
 
-**Chunk size: 100**
-**Overlap:**
+**Chunk size:** 100
+
+**Overlap:** 20
 
 <!-- What about YOUR documents made you pick these numbers? Short posts and
      long sectioned guides don't want the same chunking, and "800 seemed
@@ -96,14 +82,26 @@ June and September for the beach without the crowds. July and August are busy an
 <!-- One complete question and answer, pasted as text, with the source line
      visible. Milestone 4. -->
 
-**Question:**
+**Question:** 
+
+What to see under 2 hours in Brightwater?
 
 **Answer:**
 
 ```
+Based on the provided documents (`guide_brightwater.md`), the sights that take under two hours to see are:
+
+* **The mill museum:** This takes about 90 minutes.
+* **The 14th-century cathedral:** This takes about 20 minutes. 
+
+*(Note: The river walk runs four miles upstream, but a specific time duration is not listed for it.)*
+
+Sources retrieved: guide_brightwater.md
 ```
 
 **My relevance cutoff:**
+
+THRESHOLD = 0.6. The five in-corpus questions came back with distances between 0.3350 and 0.6042; the five OUT_OF_SCOPE questions came back between 0.8110 and 0.9991. That's a clear gap from about 0.60 to 0.81, and 0.6 sits right at its near edge — close enough that one in-corpus question ("Where in the region has difficult accessibility?", 0.6042) lands just barely on the wrong side of it. A cutoff nearer the middle of the gap, around 0.65–0.7, would keep that question in-scope while still refusing every OUT_OF_SCOPE question with room to spare.
 
 <!-- The number you set in config.py, and how you got there.
 
@@ -116,7 +114,16 @@ June and September for the beach without the crowds. July and August are busy an
 
 | Question | In corpus? | Best distance |
 |---|---|---|
-|  |  |  |
+| Where can people find good cooking in this region? | Yes | 0.5999 |
+| What to see under 2 hours in Brightwater? | Yes | 0.3975 |
+| Where should students visit during the summer? | Yes | 0.4656 |
+| What should students eat when visiting Halden Bay? | Yes | 0.3350 |
+| Where in the region has difficult accessibility? | Yes | 0.6042 |
+| What is the capital of Mongolia? | No | 0.8110 |
+| How do I change the oil in a diesel engine? | No | 0.8797 |
+| Who won the 1994 World Cup? | No | 0.9991 |
+| What is the recommended dosage of ibuprofen for a headache? | No | 0.8409 |
+| How do I write a for loop in Rust? | No | 0.8776 |
 
 ## How I Used AI
 
@@ -129,9 +136,12 @@ June and September for the beach without the crowds. July and August are busy an
 
      Milestone 5. -->
 
-**1.**
+**1.** I asked Claude to help guide me through the `split_documents` part since I did not know where to start. I wrote me 3 TODOs and I filled them in as I went, which are:
+- Use regex to split in between \n##
+- Consider whether I should keep or append the guide title and description so the system knows which context it is pulling from
+- Consider any safety guards
 
-**2.**
+**2.** I asked Claude to run the questions for me and compare different thresholds, top-k, and other specs so I did not have to run them manually.
 
 <!-- ── Stretch features ─────────────────────────────────────────────────────
      Doing one? Say so here BEFORE you start. A feature this README never
