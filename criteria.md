@@ -55,41 +55,30 @@ in at least 4 of 5 tries.
 
 ---
 
-## 4. Something about your chunks
+## 4. Chunk boundaries fall on sentence breaks
 
-<!-- YOU WRITE THIS ONE.
+For at least 4 of 5 sampled chunks, the boundary at each end lands on a
+sentence or paragraph break rather than mid-sentence or mid-word.
 
-     How would you know if your chunks were the right size? Name something
-     countable or observable.
-
-     Examples of the right shape — don't copy these, they should come from
-     what you actually saw in Milestone 3:
-       - "At least 4 of 5 sampled chunks read as a complete thought, with no
-          sentence cut in half at either end."
-       - "No chunk is shorter than 200 characters, since anything below that
-          in my corpus turned out to be a heading with no content under it." -->
-
-
-
-**Why this target:**
-
-
+**Why this target:** I sampled chunks from the current `fallback_split`
+output on `city_guides` and found boundaries like `"...which sells bread made
+from the flour grou"` (cut mid-word, off "ground") and a chunk opening
+`"our miles apart"` (cut from "four miles apart").
 
 ---
 
-## 5. Your choice
+## 5. Sources point at the right guide, not just a guide
 
-<!-- YOU WRITE THIS ONE TOO.
+For at least 4 of 5 town-specific questions, the top-cited source is that
+town's own guide document, not a different town's guide that only mentions it
+in passing.
 
-     Pick something you actually care about getting right. It could be about
-     speed, about refusals, about a particular kind of question your corpus
-     handles badly, about source attribution being correct rather than merely
-     present — anything, as long as it names a number or an observable
-     outcome. -->
-
-
-
-**Why this target:**
+**Why this target:** Brightwater is the regional hub and gets mentioned in 13
+of my 14 documents, even though only `guide_brightwater.md` is its dedicated
+source. Criterion 2 only checks that *some* source gets named — it wouldn't
+catch a Brightwater question getting answered from `guide_corry_vale.md`
+just because Corry Vale's page happens to reference it once for driving
+directions.
 
 
 
