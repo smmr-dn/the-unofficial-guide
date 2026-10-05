@@ -228,6 +228,52 @@ count behind that row.
 
      Milestone 3. -->
 
+**Criterion 2 — every answer names a source (MISSED). Stage: generation.**
+Retrieval and the gate both did their job here: the best chunk for "What
+should students eat when visiting Halden Bay?" passed the 0.6 cutoff with
+room to spare (0.335–0.372), and it says outright, "Seafood, unsurprisingly,
+and it is genuinely fresh... Everything closes by 9pm." All three runs still
+answered "I do not have enough information" / "no mention," and Run 1
+additionally cited nothing. `GROUNDING_INSTRUCTION` says "name the document
+your answer came from" and separately "if the documents don't cover the
+question, say you don't have enough information" — but nothing tells the
+model to cite a source on the *refusal* branch specifically, since "name the
+document" only reads as attached to giving an actual answer. Run 1 took the
+refusal literally and dropped the citation; Runs 2 and 3 appended one anyway,
+inconsistently. The missing instruction is the mechanism — but it's sitting
+on top of a bigger problem, below.
+
+**Criterion 5 — sources point at the right guide (MISSED). Stage: retrieval/embedding.**
+`guide_halden_bay.md`'s own "Eat and drink" chunk and `guide_eating.md`'s
+"Local specifics" chunk both describe the same thing — Halden Bay's seafood
+and its 9pm closing time — because `guide_eating.md` was written to call out
+each town by name. The embedding model scores the cross-cutting
+`guide_eating.md` chunk at distance 0.335, fractionally closer than Halden
+Bay's own chunk at 0.372, so the "top" source for a Halden Bay question
+becomes the regional eating guide. Nothing in retrieval knows that one of
+these documents is Halden Bay's canonical source and the other isn't; it only
+measures text similarity, and here the regional doc's wording happens to
+overlap with the query slightly more.
+
+**The pattern:** both misses come from the *same* question. `guide_eating.md`
+and `guide_halden_bay.md` say almost the same thing about the same town,
+close enough in embedding space that retrieval can't reliably tell them
+apart — that's criterion 5's failure directly. I think it's also why
+generation got shaky on this question specifically: handed two chunks that
+each half-own the fact instead of one chunk that clearly owns it, the model
+treated the evidence as weaker than it was and refused. One overlapping pair
+of documents is driving both misses, not two unrelated problems.
+
+Worth saying plainly: criterion 2's "4 of 5" flatters this. Runs 2 and 3
+technically pass it — a source got named — but the answer in all three runs
+is still wrong: it says there's no information about Halden Bay eating when
+the retrieved chunk states it outright. Criterion 2 only checks whether a
+citation exists, not whether the answer is correct, so it can't see that this
+question actually failed 3 of 3 times, not 1 of 3. If I were tightening a
+criterion, it's this one — "names a source" is too easy to pass while still
+getting the content wrong, and criterion 1 (chunks contain the answer, 5 of
+5) shows the content was always sitting right there in retrieval.
+
 ## The Improvement
 
 **What I changed:**
