@@ -143,6 +143,12 @@ THRESHOLD = 0.6. The five in-corpus questions came back with distances between 0
 
 **2.** I asked Claude to run the questions for me and compare different thresholds, top-k, and other specs so I did not have to run them manually.
 
+**3.** I'd started `scorer.py`'s `judge()` signature myself and asked Claude to finish it. It explained the design before writing: check the retrieved chunks for the `expects` substring (matching what criterion 1 actually asks), not the generated answer, and flagged up front that a literal substring test would under-count paraphrased answers. That turned out to matter — the script only scored 2 of 5 questions as "chunk contains the answer," so when I had Claude judge criterion 1 for this README, I asked it to read the actual retrieved chunk text for all 5 questions instead of trusting the script. That's where the 5-of-5 verdict came from, not `scorer.py`'s output.
+
+**4.** I asked Claude to diagnose my two misses (criteria 2 and 5) stage by stage instead of question by question. It found that both traced back to the same cause — `guide_eating.md` and `guide_halden_bay.md` both describe Halden Bay's seafood and 9pm closing time, close enough in embedding distance (0.335 vs 0.372) that retrieval picks the wrong one, and generation's refusal path had no rule telling it to cite a source at all. I picked its "tighten the grounding prompt" suggestion over hybrid search or a new chunking strategy because the diagnosis pointed at generation and a thin retrieval margin, not at chunk boundaries — the cheaper fix matched what was actually broken.
+
+**5.** After running the fix, I asked Claude to say plainly whether it worked rather than just report the new numbers. It split the two criteria apart instead of calling the round a win: criterion 2 fully fixed (5 of 5 every run), criterion 5 only partly (2 of 3 runs now cite the right guide first, up from inconsistent before, but not all 3) — and it flagged on its own, unprompted, that two questions still answer "no information" despite the chunk stating the fact outright, which no criterion catches. I kept that caveat in the README rather than cutting it, since it's the most honest part of the report.
+
 <!-- ── Stretch features ─────────────────────────────────────────────────────
      Doing one? Say so here BEFORE you start. A feature this README never
      claims earns nothing.
@@ -356,9 +362,49 @@ up as a regression anywhere in this table, but it's the next thing I'd fix.
 
      Milestone 5. -->
 
+**Criterion 5 — sources point at the right guide.** Still missed: 2 of 2,
+1 of 2, 2 of 2 across the three after-runs. The cause is a retrieval-level
+near-tie (`guide_eating.md` at 0.335 vs `guide_halden_bay.md` at 0.372 for
+the Halden Bay question), and a prompt instruction can only nudge generation,
+not fix an embedding ranking. What I'd do about it: boost a chunk's score
+when its source filename matches a place named in the question (a cheap,
+targeted retrieval-side fix), or add hybrid search (BM25 alongside the
+embedding) so an exact match on "Halden Bay" in the town's own document
+carries more weight than topical similarity alone. I stopped at the
+grounding-prompt change because the assignment asked for one change this
+round and I wanted to isolate its effect before touching retrieval, which is
+a bigger, riskier edit that affects every question, not just this one. The
+prompt fix was cheap to try and reversible, and testing it first told me
+clearly that the problem is upstream of generation — worth knowing before
+spending the bigger change.
+
+Not tied to a named criterion, but worth saying here rather than pretending
+it isn't there: two of my questions (Halden Bay eating, summer travel) still
+answer "the text does not mention..." in all three after-runs, even though
+the retrieved chunk states the fact outright. The grounding-prompt change
+fixed citation on these questions but not comprehension. I'd want a fourth
+thing to try — rephrasing the "don't guess" rule so it doesn't read as license
+to refuse whenever the document doesn't use the question's exact words — but
+I ran out of scope for this round rather than out of time; it felt like a
+second real change, not a follow-up to the first.
+
 ## What I'd Do Differently
 
 <!-- Knowing what you know now — which of your five criteria would you write
      differently, and why?
 
      Milestone 5. -->
+
+**Criterion 2.** I'd rewrite "every answer names a source" to also require
+the content to be right: "every answer either states the fact in `expects`
+or correctly refuses." As written, it passed cleanly in the after-runs while
+two of five answers were still factually wrong — it only ever checked for a
+citation, never for correctness, so a system that cites confidently while
+getting the content wrong looks identical to one that's actually working.
+
+**Criterion 5.** I'd give it its own dedicated set of town-specific
+questions — the way criterion 3 gets `OUT_OF_SCOPE` — instead of pulling 2 of
+them out of my general 5. "4 of 5" was never really testable this round
+because I only had 2 town-specific questions to begin with; I wrote the
+criterion before I'd thought about which of my test questions would actually
+qualify as "town-specific."
