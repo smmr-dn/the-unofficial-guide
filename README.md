@@ -170,11 +170,20 @@ THRESHOLD = 0.6. The five in-corpus questions came back with distances between 0
 
 | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
 |---|---|---|---|---|---|
-| 1. Retrieved chunk contains the answer | 4 of 5 |  |  |  |  |
-| 2. Every answer names a source | 5 of 5 |  |  |  |  |
-| 3. Gate stops out-of-corpus questions | 4 of 5 |  |  |  |  |
-| 4. | | | | | |
-| 5. | | | | | |
+| 1. Retrieved chunk contains the answer | 4 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 2. Every answer names a source | 5 of 5 | 4 of 5 | 5 of 5 | 5 of 5 | MISSED |
+| 3. Gate stops out-of-corpus questions | 4 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 4. Chunk boundaries fall on sentence breaks | 4 of 5 sampled chunks | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 5. Sources point at the right guide | 4 of 5 town-specific questions | 1 of 2 | 1 of 2 | 1 of 2 | MISSED |
+
+Criteria 1, 4, and 5 don't vary run to run — retrieval and chunking are
+deterministic, so the same chunk comes back and the same source is closest
+every time, regardless of what the model writes. Only criterion 2 (does the
+*generated* answer name a source) can actually change between runs, and it
+did: Run 1's answer to the Halden Bay eating question is a bare refusal with
+no source. Criterion 5's denominator is also off — only 2 of my 5 QUESTIONS
+are town-specific (Brightwater, Halden Bay), not 5, so "1 of 2" is the real
+count behind that row.
 
 <!-- Underneath, paste the REAL output for each criterion from one of your
      runs — the actual text your system produced, not a description of it.
@@ -193,11 +202,11 @@ THRESHOLD = 0.6. The five in-corpus questions came back with distances between 0
 
 | # | Criterion | Verdict | How I decided |
 |---|---|---|---|
-| 1 |  |  |  |
-| 2 |  |  |  |
-| 3 |  |  |  |
-| 4 |  |  |  |
-| 5 |  |  |  |
+| 1 | Retrieved chunk contains the answer | MET | I read the actual retrieved chunks for all 5 questions instead of trusting `scorer.py` alone — its literal substring check only catches 2 of 5 because it demands exact wording. By reading them: the cooking and summer chunks match the expected text verbatim; Brightwater's chunk has two of three facts word-for-word and the third (90 minutes at the mill) in substance, just phrased as "Allow 90 minutes"; the accessibility chunk names all three towns; and the Halden Bay chunk says the kitchens close "by 9pm," the same fact as "arrive before 9pm," just framed as a closing time. 5 of 5 clears the 4-of-5 target. |
+| 2 | Every answer names a source | MISSED | Run 1's answer to "What should students eat when visiting Halden Bay?" is a bare refusal sentence with zero source citation, so that run was 4 of 5, not 5 of 5. Runs 2 and 3 were both clean. The target was *every* answer, every time, and one run dropping to 4 is a miss even though two of three runs were perfect. |
+| 3 | Gate stops out-of-corpus questions | MET | 5 of 5 OUT_OF_SCOPE questions were refused, and the closest of them (0.811) still has a comfortable margin over the 0.6 cutoff. This check is deterministic — one pass, not three — so there's no run-to-run variance to second-guess. |
+| 4 | Chunk boundaries fall on sentence breaks | MET | Pulled a random sample of 5 chunks from the current `split_documents` output and checked both ends of each. All 5 start right after a `##` heading and end on a sentence-final period — the rewritten chunker splits on heading boundaries instead of a fixed character count, so there's no longer a mechanism that could land mid-word. 5 of 5 clears the target comfortably. |
+| 5 | Sources point at the right guide | MISSED | Only 2 of my 5 QUESTIONS are actually town-specific (Brightwater, Halden Bay) — not the 5 this criterion assumes, so "4 of 5" can't really be tested here. Of the 2 I have, Brightwater's top-cited source is correctly `guide_brightwater.md`, but Halden Bay's closest retrieved chunk (distance 0.335) comes from `guide_eating.md`, not `guide_halden_bay.md` (0.372) — the exact failure mode this criterion was written to catch. 1 of 2 misses the target no matter how thin the sample is. |
 
 ## Diagnoses
 
