@@ -276,12 +276,21 @@ getting the content wrong, and criterion 1 (chunks contain the answer, 5 of
 
 ## The Improvement
 
-**What I changed:**
+**What I changed:** Tightened `GROUNDING_INSTRUCTION` in `generate.py` — the
+system prompt sent with every answer. Three additions, all to the same
+instruction block: (1) don't refuse just because the topic also comes up in
+other documents, (2) name the document(s) checked even when refusing, and
+(3) when the question names a specific place and one of the retrieved
+documents is that place's own guide, cite it first.
 
-**Why I picked it:**
-
-<!-- Connect it to a specific diagnosis above in one sentence. If you can't,
-     you picked a fix because it sounded impressive. -->
+**Why I picked it:** Both of my misses trace to this one prompt. Criterion
+2's miss was literally a missing rule — nothing told the model to cite a
+source on the refusal branch, so Run 1 of the Halden Bay question dropped it.
+Criterion 5's miss is really a retrieval-side near-tie (`guide_eating.md` at
+0.335 vs `guide_halden_bay.md` at 0.372), which a prompt change can't fix at
+the source, but it's a one-line, zero-risk addition to try nudging the model
+toward the place's own guide when one is available, before reaching for
+something heavier like hybrid search.
 
 ### Run Log — After
 
@@ -290,20 +299,52 @@ getting the content wrong, and criterion 1 (chunks contain the answer, 5 of
 
 | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
 |---|---|---|---|---|---|
-| 1. Retrieved chunk contains the answer | 4 of 5 |  |  |  |  |
-| 2. Every answer names a source | 5 of 5 |  |  |  |  |
-| 3. Gate stops out-of-corpus questions | 4 of 5 |  |  |  |  |
-| 4. | | | | | |
-| 5. | | | | | |
+| 1. Retrieved chunk contains the answer | 4 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 2. Every answer names a source | 5 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 3. Gate stops out-of-corpus questions | 4 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 4. Chunk boundaries fall on sentence breaks | 4 of 5 sampled chunks | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 5. Sources point at the right guide | 4 of 5 town-specific questions | 2 of 2 | 1 of 2 | 2 of 2 | MISSED |
+
+Criteria 1, 3, and 4 are unaffected by this change, as expected — it only
+touches generation, not chunking or retrieval, so those three still read
+exactly as before. Criterion 5 here is counted by which source the *answer*
+names first, not by raw retrieval distance — that's a more precise read of
+"top-cited source" than I used for the Before table, and under it, Before
+would have been 1 of 2, 1 of 2, 2 of 2 rather than the flat "1 of 2" I
+reported for all three runs (the citation order actually varied run to run;
+I just hadn't looked that closely before).
 
 **Did it help?**
 
-<!-- Say plainly whether it did, and how you know. If it made things worse,
-     say that — a change that backfired, honestly reported, earns full credit
-     and is more interesting than one that worked. What matters is that you can
-     tell.
+Yes for criterion 2, no for criterion 5.
 
-     Milestone 4. -->
+Criterion 2 is fully fixed: every one of the 15 answers across the three
+"after" runs now names at least one source, including Run 1 of the Halden Bay
+question, which previously had none. That's exactly the mechanism the
+diagnosis named — the refusal branch now has a citation rule — and it held
+for all three runs, not just the one that used to fail.
+
+Criterion 5 only partially moved. Run 1 of the Halden Bay question now cites
+`guide_halden_bay.md` first instead of citing nothing, so that run went from
+1 of 2 to 2 of 2. But Run 2 still cites `guide_eating.md` first — the "cite
+the place's own guide first" instruction doesn't fire reliably, because the
+model is working from the same two near-tied chunks every time and sometimes
+follows the retrieval order instead of the place-name rule. The target needs
+to hold on 4 of 5 (here, both) questions every run, and it still doesn't, so
+this stays MISSED. That's consistent with the diagnosis: criterion 5's real
+cause is in retrieval/embedding, and a prompt instruction can bias generation
+but can't fix a ranking problem upstream of it. A real fix here is a
+retrieval-side change — boosting a chunk when its source document's name
+matches a place named in the question, or hybrid search — not more prompt
+tuning.
+
+One more honest note: this change did not fix the deeper problem underneath
+criterion 2's old miss. The Halden Bay and summer questions still say "the
+text does not mention" / "no mention" in all three after-runs, even though
+`guide_halden_bay.md` and `guide_seasons.md` state the answers outright —
+the model now cites its sources correctly while still getting the content
+wrong. No criterion in `criteria.md` checks that directly, so it doesn't show
+up as a regression anywhere in this table, but it's the next thing I'd fix.
 
 ## What's Still Broken
 

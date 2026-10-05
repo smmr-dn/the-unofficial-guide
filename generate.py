@@ -33,6 +33,7 @@ import json
 import os
 import sys
 import time
+from typing import Any
 
 import config
 
@@ -234,7 +235,7 @@ def generate(prompt: str, system: str | None = None, cache: bool = True) -> str:
             _call_times.append(time.monotonic())
             _session_calls += 1
 
-            kwargs = {"model": config.MODEL, "contents": prompt}
+            kwargs: dict[str, Any] = {"model": config.MODEL, "contents": prompt}
             if system:
                 kwargs["config"] = {"system_instruction": system}
 
@@ -277,8 +278,9 @@ GROUNDING_INSTRUCTION = """You answer questions using only the documents provide
 
 Rules:
 - Use only the information in the documents below. Do not use anything you know from elsewhere.
-- If the documents don't cover the question, say you don't have enough information. Do not guess.
-- Name the document your answer came from, using the filename given in each excerpt.
+- If any one of the documents below states the answer, use it. Don't say you lack enough information just because the topic also comes up in other documents.
+- If the documents really don't cover the question, say you don't have enough information — and still name the document(s) you checked.
+- Name the document your answer came from, using the filename given in each excerpt. If the question names a specific place and one of the documents is that place's own guide, cite that document first.
 - Be brief. Two or three sentences is usually enough."""
 
 
